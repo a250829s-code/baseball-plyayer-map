@@ -110,9 +110,7 @@ body{
 
     top: 20px;
 
-    left: 50%;
-
-    transform: translateX(-50%);
+    left: 520px;
 
     z-index: 20;
 
@@ -120,9 +118,9 @@ body{
 
     background: rgba(255,255,255,0.85);
 
-    padding: 12px 24px;
+    padding: 10px 20px;
 
-    border-radius: 12px;
+    border-radius: 10px;
 
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 
