@@ -219,3 +219,27 @@ document.getElementById("memberButton").addEventListener("click", () => {
     }
 
 });
+
+// Aboutボタン
+
+document
+.getElementById("aboutButton")
+.addEventListener("click",()=>{
+
+    document
+    .getElementById("aboutPanel")
+    .style.display="block";
+
+});
+
+// 閉じるボタン
+
+document
+.getElementById("closeAbout")
+.addEventListener("click",()=>{
+
+    document
+    .getElementById("aboutPanel")
+    .style.display="none";
+
+});

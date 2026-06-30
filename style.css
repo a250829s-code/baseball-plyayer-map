@@ -208,3 +208,96 @@ body{
     margin: 5px 0;
     text-align: left;
 }
+
+/* ===== Aboutボタン ===== */
+
+#aboutBox{
+
+    position:absolute;
+
+    top:20px;
+
+    right:120px;
+
+    z-index:100;
+
+}
+
+#aboutButton{
+
+    background:#d32f2f;
+
+    color:white;
+
+    border:none;
+
+    padding:12px 20px;
+
+    font-size:16px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+}
+
+#aboutButton:hover{
+
+    background:#b71c1c;
+
+}
+
+
+/* ===== About画面 ===== */
+
+#aboutPanel{
+
+    display:none;
+
+    position:absolute;
+
+    top:80px;
+
+    right:20px;
+
+    width:380px;
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    z-index:200;
+
+    box-shadow:0 0 15px rgba(0,0,0,0.3);
+
+}
+
+#aboutPanel h2{
+
+    margin-top:0;
+
+    text-align:center;
+
+}
+
+#closeAbout{
+
+    width:100%;
+
+    margin-top:20px;
+
+    padding:10px;
+
+    background:#d32f2f;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}
