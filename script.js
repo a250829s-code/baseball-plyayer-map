@@ -207,3 +207,15 @@ map.on('style.load', () => {
             .addTo(map);
     });
 });
+
+document.getElementById("memberButton").addEventListener("click", () => {
+
+    const panel = document.getElementById("memberPanel");
+
+    if (panel.style.display === "none" || panel.style.display === "") {
+        panel.style.display = "block";
+    } else {
+        panel.style.display = "none";
+    }
+
+});
