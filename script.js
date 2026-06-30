@@ -124,6 +124,12 @@ function showTrajectory() {
 // 検索ボタンをクリックしたら検索
 document.getElementById('searchButton').addEventListener('click', searchLocation);
 
+//xボタンをクリックしたら検索欄を空にする
+document.getElementById('clearButton').addEventListener('click', () => {
+    document.getElementById('searchInput').value = "";
+    document.getElementById('searchInput').focus();
+});
+
 // Enterキーでも検索できるようにする
 document.getElementById('searchInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
