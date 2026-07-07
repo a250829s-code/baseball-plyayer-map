@@ -1,12 +1,38 @@
 const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPDbk4hRCAheBniBKNlZhqp-eaty-Ln8YvfJeTBmY15vCNQ2ZgitfutAsf2yyzE0VH7K0q88DTKZ85/pub?gid=0&single=true&output=csv";
+const googleFormURL = "https://forms.gle/3rFN5SMVfwiaJ8xU6";
 
 // ===== 地図の初期化 =====
 
 const map = new maplibregl.Map({
     container: 'map',
-    style: 'https://demotiles.maplibre.org/style.json',
+
+    style: {
+        version: 8,
+        sources: {
+            'osm': {
+                type: 'raster',
+                tiles: [
+                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+                ],
+                tileSize: 256,
+                attribution: '© OpenStreetMap contributors'
+            }
+        },
+        layers: [
+            {
+                id: 'osm-layer',
+                type: 'raster',
+                source: 'osm'
+            }
+        ]
+    },
+
     center: [139.767, 35.681],
     zoom: 1.5,
+
+    projection: {
+        type: 'globe'
+    }
 });
 
 let locations = [];
@@ -131,6 +157,63 @@ function showTrajectory() {
     });
 }
 
+// ==== 同じidの人の軌跡表示
+
+function showPersonTrajectory(personId) {
+
+    const personLocations = locations.filter(loc => loc.id === personId);
+
+    if (personLocations.length < 2) {
+        alert("軌跡を表示するには同じidの地点が2つ以上必要です。");
+        return;
+    }
+
+    const features = [];
+
+    for (let i = 0; i < personLocations.length - 1; i++) {
+
+        const start = [
+            personLocations[i].lng,
+            personLocations[i].lat
+        ];
+
+        const end = [
+            personLocations[i + 1].lng,
+            personLocations[i + 1].lat
+        ];
+
+        const line = turf.greatCircle(start, end, {
+            npoints: 100
+        });
+
+        features.push(line);
+    }
+
+    const trajectoryData = {
+        type: "FeatureCollection",
+        features: features
+    };
+
+    const source = map.getSource("trajectory-source");
+
+    if (source) {
+        source.setData(trajectoryData);
+    }
+
+    map.setLayoutProperty("trajectory-line", "visibility", "visible");
+    map.setLayoutProperty("trajectory-arrow", "visibility", "visible");
+
+    map.flyTo({
+        center: [
+            personLocations[0].lng,
+            personLocations[0].lat
+        ],
+        zoom: 3,
+        speed: 0.8,
+        curve: 1.2
+    });
+}
+
 // ===== 検索ボタン =====
 
 document.getElementById('searchButton').addEventListener('click', searchLocation);
@@ -146,9 +229,15 @@ document.getElementById('searchInput').addEventListener('keydown', (e) => {
     }
 });
 
+// ==== Googleフォームを開く ====
+
+document.getElementById("addTrajectoryButton").addEventListener("click", () => {
+    window.open(googleFormURL, "_blank");
+});
+
 // ===== 地図読み込み後 =====
 
-map.on('style.load', () => {
+map.on('load', () => {
     map.setProjection({
         type: 'globe'
     });
@@ -238,13 +327,15 @@ function loadSpreadsheetData() {
                 "los angeles angels": angels
             };
 
-            locations.forEach(loc => {
+           locations.forEach((loc, index) => {
+
                 if (!loc.lat || !loc.lng) {
                     return;
                 }
 
-                let popupHTML = `<strong>${loc.name}</strong>`;
+                let popupHTML = `<strong>${loc.name}</strong><br>${loc.description}`;
 
+                // 大谷翔平専用
                 if (loc.id === "hanamaki") {
                     popupHTML += `
                         <br>
@@ -255,8 +346,26 @@ function loadSpreadsheetData() {
                             大谷翔平選手の軌跡を見る
                         </button>
                     `;
-                } else {
-                    popupHTML += `<br>${loc.description}`;
+                }
+
+                // 同じidが2件以上あるか確認
+                const samePersonLocations = locations.filter(item => item.id === loc.id);
+                const firstLocation = samePersonLocations[0];
+
+                if (
+                    samePersonLocations.length >= 2 &&
+                    loc === firstLocation &&
+                    loc.id !== "hanamaki"
+                ) {
+                    popupHTML += `
+                        <br>
+                        <button
+                            class="popup-button"
+                            onclick="showPersonTrajectory('${loc.id}')"
+                        >
+                            軌跡を見る
+                        </button>
+                    `;
                 }
 
                 const popup = new maplibregl.Popup({ offset: 25 })

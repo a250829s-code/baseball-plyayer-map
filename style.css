@@ -3,6 +3,7 @@
 body{
     margin:0;
     padding:0;
+    height: 100%;
 }
 
 #map{
@@ -10,6 +11,7 @@ body{
     top:0;
     bottom:0;
     width:100%;
+    height: 100vh;
 }
 
 /* 検索欄 */
@@ -314,4 +316,25 @@ body{
 
 #clearButton:hover {
     background: #616161;
+}
+
+#addTrajectoryBox {
+    position: absolute;
+    top: 20px;
+    right: 230px;
+    z-index: 100;
+}
+
+#addTrajectoryButton {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#addTrajectoryButton:hover {
+    background: #ef6c00;
 }
