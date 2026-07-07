@@ -320,8 +320,8 @@ body{
 
 #addTrajectoryBox {
     position: absolute;
-    top: 20px;
-    right: 230px;
+    top: 75px;
+    right: 120px;
     z-index: 100;
 }
 
