@@ -1,4 +1,7 @@
-// 4. 地図の初期化
+const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPDbk4hRCAheBniBKNlZhqp-eaty-Ln8YvfJeTBmY15vCNQ2ZgitfutAsf2yyzE0VH7K0q88DTKZ85/pub?gid=0&single=true&output=csv";
+
+// ===== 地図の初期化 =====
+
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://demotiles.maplibre.org/style.json',
@@ -6,51 +9,52 @@ const map = new maplibregl.Map({
     zoom: 1.5,
 });
 
-// データの定義（MapLibreは [経度(lng), 緯度(lat)] の順番）
-const locations = [
-    {
-        id: "hanamaki",
-        lng: 141.1166,
-        lat: 39.4084,
-        name: "花巻東高校",
-        description: "大谷翔平さんの出身高校"
-    },
-    {
-        id: "angels",
-        lng: -117.8827,
-        lat: 33.8003,
-        name: "エンゼルス本拠地",
-        description: "Angel Stadium of Anaheim"
+let locations = [];
+let hanamaki;
+let angels;
+let searchTargets = {};
+
+// ===== CSVを配列に変換 =====
+
+function csvToArray(text) {
+    const lines = text.trim().split("\n");
+    const headers = lines[0].split(",").map(header => header.trim());
+
+    return lines.slice(1).map(line => {
+        const values = line.split(",").map(value => value.trim());
+        const row = {};
+
+        headers.forEach((header, index) => {
+            row[header] = values[index];
+        });
+
+        return row;
+    });
+}
+
+// ===== 国ごとのマーカー色 =====
+
+function markerColor(category) {
+    switch (category) {
+        case "Japan":
+            return "#e53935";
+
+        case "USA":
+            return "#1565c0";
+
+        case "Korea":
+            return "#43a047";
+
+        case "Taiwan":
+            return "#fb8c00";
+
+        default:
+            return "#757575";
     }
-];
+}
 
-const hanamaki = locations.find(loc => loc.id === "hanamaki");
-const angels = locations.find(loc => loc.id === "angels");
+// ===== 指定した場所へ移動 =====
 
-// 検索用データ
-const searchTargets = {
-    "大谷翔平": hanamaki,
-    "おおたにしょうへい": hanamaki,
-    "オオタニショウヘイ": hanamaki,
-    "花巻東高校": hanamaki,
-    "花巻東": hanamaki,
-    "はなまきひがしこうこう": hanamaki,
-    "ハナマキヒガシコウコウ": hanamaki,
-
-    "エンゼルス": angels,
-    "エンゼルス本拠地": angels,
-    "エンゼルスの本拠地": angels,
-    "エンゼルスタジアム": angels,
-    "エンジェルスタジアム": angels,
-    "Angel Stadium": angels,
-    "angel stadium": angels,
-    "Angels": angels,
-    "angels": angels,
-    "Los Angeles Angels": angels,
-    "los angeles angels": angels
-};
-
-// 指定した場所へ移動する関数
 function moveToLocation(loc) {
     map.flyTo({
         center: [loc.lng, loc.lat],
@@ -60,7 +64,8 @@ function moveToLocation(loc) {
     });
 }
 
-// 検索する関数
+// ===== 検索 =====
+
 function searchLocation() {
     const keyword = document.getElementById('searchInput').value.trim();
 
@@ -74,70 +79,75 @@ function searchLocation() {
     if (loc) {
         moveToLocation(loc);
     } else {
-        alert("見つかりませんでした。「大谷翔平」「花巻東高校」「エンゼルス」などを入力してください。");
+        alert("見つかりませんでした。");
     }
 }
 
-// 花巻東高校からエンゼルス本拠地までの軌跡を表示する関数
+// ===== 軌跡表示：最短距離 =====
+
 function showTrajectory() {
+    if (!hanamaki || !angels) {
+        alert("軌跡データがまだ読み込まれていません。");
+        return;
+    }
+
+    const start = [hanamaki.lng, hanamaki.lat];
+    const end = [angels.lng, angels.lat];
+
+    const greatCircleLine = turf.greatCircle(
+        start,
+        end,
+        {
+            npoints: 100
+        }
+    );
+
     const trajectoryData = {
-        type: 'FeatureCollection',
+        type: "FeatureCollection",
         features: [
-            {
-                type: 'Feature',
-                properties: {
-                    name: '花巻東高校からエンゼルス本拠地への軌跡'
-                },
-                geometry: {
-                    type: 'LineString',
-                    coordinates: [
-                        [hanamaki.lng, hanamaki.lat],
-                        [angels.lng, angels.lat]
-                    ]
-                }
-            }
+            greatCircleLine
         ]
     };
 
-    const source = map.getSource('trajectory-source');
+    const source = map.getSource("trajectory-source");
 
     if (source) {
         source.setData(trajectoryData);
     }
 
-    if (map.getLayer('trajectory-line')) {
-        map.setLayoutProperty('trajectory-line', 'visibility', 'visible');
+    if (map.getLayer("trajectory-line")) {
+        map.setLayoutProperty("trajectory-line", "visibility", "visible");
     }
 
-    if (map.getLayer('trajectory-arrow')) {
-        map.setLayoutProperty('trajectory-arrow', 'visibility', 'visible');
+    if (map.getLayer("trajectory-arrow")) {
+        map.setLayoutProperty("trajectory-arrow", "visibility", "visible");
     }
 
     map.flyTo({
-        center: [-170, 37],
-        zoom: 2.1,
+        center: [-170, 45],
+        zoom: 2,
         speed: 0.8,
         curve: 1.2
     });
 }
 
-// 検索ボタンをクリックしたら検索
+// ===== 検索ボタン =====
+
 document.getElementById('searchButton').addEventListener('click', searchLocation);
 
-//xボタンをクリックしたら検索欄を空にする
 document.getElementById('clearButton').addEventListener('click', () => {
     document.getElementById('searchInput').value = "";
     document.getElementById('searchInput').focus();
 });
 
-// Enterキーでも検索できるようにする
 document.getElementById('searchInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         searchLocation();
     }
 });
 
-// 地図のスタイルが読み込まれたら実行
+// ===== 地図読み込み後 =====
+
 map.on('style.load', () => {
     map.setProjection({
         type: 'globe'
@@ -187,35 +197,88 @@ map.on('style.load', () => {
         }
     });
 
-    locations.forEach(loc => {
-        let popupHTML = `<strong>${loc.name}</strong>`;
-
-        if (loc.id === "hanamaki") {
-            popupHTML += `
-                <br>
-                <button
-                    class="popup-button"
-                    onclick="showTrajectory()"
-                >
-                    大谷翔平選手の軌跡を見る
-                </button>
-            `;
-        } else {
-            popupHTML += `<br>${loc.description}`;
-        }
-
-        const popup = new maplibregl.Popup({ offset: 25 })
-            .setHTML(popupHTML);
-
-        new maplibregl.Marker()
-            .setLngLat([loc.lng, loc.lat])
-            .setPopup(popup)
-            .addTo(map);
-    });
+    loadSpreadsheetData();
 });
 
-document.getElementById("memberButton").addEventListener("click", () => {
+// ===== Google Sheetsから読み込み =====
 
+function loadSpreadsheetData() {
+    fetch(csvURL)
+        .then(response => response.text())
+        .then(csv => {
+            locations = csvToArray(csv).map(row => ({
+                id: row.id,
+                name: row.name,
+                lat: Number(row.lat),
+                lng: Number(row.lng),
+                category: row.category,
+                description: row.description
+            }));
+
+            hanamaki = locations.find(loc => loc.id === "hanamaki");
+            angels = locations.find(loc => loc.id === "angels");
+
+            searchTargets = {
+                "大谷翔平": hanamaki,
+                "おおたにしょうへい": hanamaki,
+                "オオタニショウヘイ": hanamaki,
+                "花巻東高校": hanamaki,
+                "花巻東": hanamaki,
+
+                "エンゼルス": angels,
+                "エンゼルス本拠地": angels,
+                "エンゼルスの本拠地": angels,
+                "エンゼルスタジアム": angels,
+                "エンジェルスタジアム": angels,
+                "Angel Stadium": angels,
+                "angel stadium": angels,
+                "Angels": angels,
+                "angels": angels,
+                "Los Angeles Angels": angels,
+                "los angeles angels": angels
+            };
+
+            locations.forEach(loc => {
+                if (!loc.lat || !loc.lng) {
+                    return;
+                }
+
+                let popupHTML = `<strong>${loc.name}</strong>`;
+
+                if (loc.id === "hanamaki") {
+                    popupHTML += `
+                        <br>
+                        <button
+                            class="popup-button"
+                            onclick="showTrajectory()"
+                        >
+                            大谷翔平選手の軌跡を見る
+                        </button>
+                    `;
+                } else {
+                    popupHTML += `<br>${loc.description}`;
+                }
+
+                const popup = new maplibregl.Popup({ offset: 25 })
+                    .setHTML(popupHTML);
+
+                new maplibregl.Marker({
+                    color: markerColor(loc.category)
+                })
+                    .setLngLat([loc.lng, loc.lat])
+                    .setPopup(popup)
+                    .addTo(map);
+            });
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Google Sheetsのデータを読み込めませんでした。CSV URLを確認してください。");
+        });
+}
+
+// ===== メンバー紹介 =====
+
+document.getElementById("memberButton").addEventListener("click", () => {
     const panel = document.getElementById("memberPanel");
 
     if (panel.style.display === "none" || panel.style.display === "") {
@@ -223,29 +286,14 @@ document.getElementById("memberButton").addEventListener("click", () => {
     } else {
         panel.style.display = "none";
     }
-
 });
 
-// Aboutボタン
+// ===== About =====
 
-document
-.getElementById("aboutButton")
-.addEventListener("click",()=>{
-
-    document
-    .getElementById("aboutPanel")
-    .style.display="block";
-
+document.getElementById("aboutButton").addEventListener("click", () => {
+    document.getElementById("aboutPanel").style.display = "block";
 });
 
-// 閉じるボタン
-
-document
-.getElementById("closeAbout")
-.addEventListener("click",()=>{
-
-    document
-    .getElementById("aboutPanel")
-    .style.display="none";
-
+document.getElementById("closeAbout").addEventListener("click", () => {
+    document.getElementById("aboutPanel").style.display = "none";
 });
