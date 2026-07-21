@@ -8,6 +8,7 @@
 
     <link href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="quiz.css">
 </head>
 
 <body>
@@ -116,8 +117,37 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+<!-- Baseball Quizボタン -->
+
+<button id="quizButton">⚾ Baseball Quiz</button>
+
+<!-- クイズ画面 -->
+
+<div id="quizPanel">
+
+<div id="quizHeader">
+    <h2>Baseball Quiz</h2>
+
+    <button id="closeQuiz">x</button>
+</div>
+
+<p id="question"></p>
+
+<div id="choices"></div>
+
+<div id="explanation"></div>
+
+<button id="nextButton" style="display:none;">
+
+次の問題
+
+</button>
+
+</div>
+
     <script src="script.js"></script>
+    <script src="quiz.js"></script>
 
 </body>
-
 </html>
