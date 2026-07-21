@@ -74,6 +74,30 @@ function markerColor(category) {
         case "Taiwan":
             return "#fb8c00";
 
+        case "Republica Dominicana":
+            return "#ad03fc";
+
+        case "Cuba":
+            return "#03befc";
+
+        case "Venezuela":
+            return "#84fc03";
+
+        case "Mexico":
+            return "#fcf803";
+
+        case "Puerto　Rico":
+            return "#fc03ec";
+
+        case "Aruba":
+            return "#8B4513";
+
+        case "Dominica":
+            return "#FFFFFF";
+
+        case "DOMINICA":
+            return "#000000";
+
         default:
             return "#757575";
     }
