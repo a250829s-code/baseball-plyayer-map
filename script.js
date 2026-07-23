@@ -98,6 +98,12 @@ function markerColor(category) {
         case "DOMINICA":
             return "#000000";
 
+        case "DOM":
+            return "#00FF00";
+
+        case "VEN":
+            return "#fce2c4";
+
         default:
             return "#757575";
     }
