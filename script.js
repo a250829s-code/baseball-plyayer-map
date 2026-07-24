@@ -80,6 +80,9 @@ function markerColor(category) {
         case "Cuba":
             return "#03befc";
 
+        case "Republica de Cuba":
+            return "#03befc";
+
         case "Venezuela":
             return "#84fc03";
 
