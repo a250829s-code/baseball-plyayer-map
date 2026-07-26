@@ -40,6 +40,9 @@ let hanamaki;
 let angels;
 let searchTargets = {};
 
+//現在表示中の軌跡ID
+let currentTrajectory = null;
+
 // ===== CSVを配列に変換 =====
 
 function csvToArray(text) {
@@ -145,6 +148,24 @@ function searchLocation() {
 // ===== 軌跡表示：最短距離 =====
 
 function showTrajectory() {
+
+    //大谷の軌跡が表示中なら消す
+    if (currentTrajectory === "hanamaki") {
+
+        map.setLayoutProperty("trajectory-line", "visibility", "none");
+        map.setLayoutProperty("trajectory-arrow", "visibility", "none");
+
+        currentTrajectory = null;
+        return;
+    }
+
+    //他の軌跡が表示中なら一旦消す
+    if (currentTrajectory !== null) {
+
+        map.setLayoutProperty("trajectory-line", "visibility", "none");
+        map.setLayoutProperty("trajectory-arrow", "visibility", "none");
+    }
+
     if (!hanamaki || !angels) {
         alert("軌跡データがまだ読み込まれていません。");
         return;
@@ -188,11 +209,30 @@ function showTrajectory() {
         speed: 0.8,
         curve: 1.2
     });
+
+    currentTrajectory = "hanamaki";
 }
 
 // ==== 同じidの人の軌跡表示
 
 function showPersonTrajectory(personId) {
+
+    //同じ人の軌跡なら消す
+    if (currentTrajectory === personId) {
+
+        map.setLayoutProperty("trajectory-line", "visibility", "none");
+        map.setLayoutProperty("trajectory-arrow", "visibility", "none");
+
+        currentTrajectory = null;
+        return;
+    }
+
+    //他の人の軌跡が表示中なら一旦消す
+    if (currentTrajectory !== null) {
+
+        map.setLayoutProperty("trajectory-line", "visibility", "none");
+        map.setLayoutProperty("trajectory-arrow", "visibility", "none");
+    }
 
     const personLocations = locations.filter(loc => loc.id === personId);
 
@@ -245,6 +285,8 @@ function showPersonTrajectory(personId) {
         speed: 0.8,
         curve: 1.2
     });
+
+    currentTrajectory = personId;
 }
 
 // ===== 検索ボタン =====
